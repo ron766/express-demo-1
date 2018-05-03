@@ -1,17 +1,18 @@
 const express = require('express');
-//loading handlebars
-const hbs = require('hbs');
-
+const http = require('http');
+//json parser
+var bodyParser = require('body-parser');
+var jsonParser = bodyParser.json();
 //port
 const port = process.env.PORT || 3000;
 
 var app = express();
 
-// register partials
-hbs.registerPartials(__dirname + '/views/partials');
 
-//app.set(key,value)
-app.set('view engine' , 'hbs');
+//app.set(key,value) engine
+app.set('view engine', 'html');
+app.engine('.html', require('ejs').renderFile);
+app.set('views',__dirname+'/views');
 
  //middleware
  //to use built-in middleware
@@ -24,20 +25,28 @@ app.set('view engine' , 'hbs');
    next();
  });
 
- //http route handlers
+ //display http
  app.get('/' , (req, res) => {
- 	/*res.send('<h1>Hello Express !!</h1>');*/
-
- 	//to send json
- 	res.send({
- 		name: 'rohan',
- 		likes: ['riding' , 'eating']
- 	});
+  //jsonParser
+  res.render("jsonDisp", {
+    data:{
+      name: 'rohan',
+      likes: ['riding' , 'eating']
+    }
+  });
  });
+
+ //http route handlers -> json
+ //to send json
+ //calling json methods
+ app.use(bodyParser.json());
+ app.use(bodyParser.urlencoded({extended:true}));
+
+ //http route handlers
 
 //new route 2 // for hbs
  app.get('/about',(req,res) => {
- 	res.render('about.hbs' , {
+ 	res.render('about.html' , {
     pageTitle: 'About Page',
     currentYear: new Date().getFullYear()
   });
@@ -45,17 +54,24 @@ app.set('view engine' , 'hbs');
 
  //for home page
  app.get('/home',(req,res) => {
-   res.render('home.hbs' , {
+   res.render('home.html' , {
     pageTitle: 'Home Page',
     currentYear: new Date().getFullYear(),
     welcomeMessage: 'Hi this is home'
   });
  });
 
+//project page
+app.get('/projects' , (req,res) => {
+  res.render('projects.html' , {
+    pageTitle: 'Project page' ,
+    pageDescription: 'GitHub links of projects'
+  });
+});
+
 /* new route 3*/
 app.get('/bad',(req,res) => {
 	res.send({
-		/*error: "Error handling request" */
 		errorMessage: 'Unable to handle request'
 	});
 });
